@@ -5,11 +5,9 @@
  *
  * Created by johndoe on 29.12.2015.
  */
+var Constants = require('./constants');
+var Util = require('./util');
 var Cube = require('./cube');
-var cube = new Cube(2);
-var directions = [01, 10, 23, 32, 02, 20, 13, 31];
-//todo isn't there a more elegant way?
-var reverseDirections = { 01 : 10, 10 : 01, 23 : 32, 32 : 23, 02 : 20, 20 : 02, 13 : 31, 31 : 13};
 var states = {};
 
 /**
@@ -49,23 +47,16 @@ function checkExists(q) {
 }
 
 function iterateConstruct(q, step, lastDir) {
-    var shifted, currentState = q.toString(), existing, existingState;
+    var shifted, currentState = q.toString(), existingState;
 
     // todo refactor this bullshit if it stays
     if (states[currentState] !== undefined) {
         if (step < states[currentState].value) {
             states[currentState].value = step;
-            console.log("MUIE 1");
             states[currentState].parent = lastDir;
         }
-    } else if ((existing = states[existingState = checkExists(q)]) !== undefined ) {
-        //states[currentState] = {};
-        //states[currentState].value = existing.value > step ? step : existing.value;
-        //states[currentState].parent = existing.parent;
+    } else if (states[existingState = checkExists(q)] !== undefined ) {
         if (step < states[existingState].value) {
-            //states[existingState].value = step;
-            //states[existingState].parent = lastDir;
-            console.log("MUIE 2");
             delete states[existingState];
             states[currentState] = {};
             states[currentState].value = step;
@@ -75,16 +66,15 @@ function iterateConstruct(q, step, lastDir) {
         states[currentState] = {};
         states[currentState].value = step;
         states[currentState].parent = lastDir;
-        for (var i = 0; i < directions.length; i++) {
-            // not 100% sure about this
-            lastDir = reverseDirections[directions[i]];
-            //states[currentState].parent = lastDir = directions[i];
-            shifted = q.shift(directions[i]);
-            iterateConstruct(shifted, step + 1, lastDir);
+        for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
+            var curDir = Constants.DIRECTIONS[q.size()][i];
+            shifted = q.shift(curDir);
+            iterateConstruct(shifted, step + 1, Util.reverseDirection(curDir));
         }
     }
 }
-iterateConstruct(cube, 0);
+//iterateConstruct(new Cube(3), 0);
+iterateConstruct(new Cube(2), 0);
 
 function iterateSearch(q) {
     var existing, existingState, qparent, state = q.toString();
@@ -92,7 +82,7 @@ function iterateSearch(q) {
         if (existing.value) {
             console.log(state + ' ' + existing.parent + (existingState ? ' alternate' : ''));
             if (existingState) // we found a matching alternate state
-                q = new Cube(2, existingState);
+                q = new Cube(q.size(), existingState);
             qparent = q.shift(existing.parent);
             iterateSearch(qparent);
         } else
@@ -111,8 +101,8 @@ module.exports = {
     shuffle: function (times) {
         var q = new Cube(2), dir;
         for (var i = 0; i < times; i++) {
-            dir = Math.floor(Math.random() * directions.length);
-            q = q.shift(directions[dir]);
+            dir = Math.floor(Math.random() * Constants.DIRECTIONS[q.size()].length);
+            q = q.shift(Constants.DIRECTIONS[q.size()][dir]);
         }
         return q.toString();
     }

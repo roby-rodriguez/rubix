@@ -9,6 +9,7 @@ var Constants = {
     ENCODING_BASIC: 'abcdef',
     START_LETTER : 'a',
     NR_OF_CUBE_FACES : 6,
+
     UPPER_WORD : {
         2 : 0x00000FC0,
         3 : 0x00000000, // todo see how this should work
@@ -16,6 +17,10 @@ var Constants = {
     LOWER_WORD : {
         2 : 0x0000003F,
         3 : 0x00000000, // todo see how this should work
+    },
+    DIRECTIONS : {
+        2 : [ '12', '21', '34', '43', '13', '31', '24', '42' ],
+        3 : [  ]
     }
 };
 

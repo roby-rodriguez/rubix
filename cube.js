@@ -1,23 +1,12 @@
 /**
- * Check out these JS links:
- * http://stackoverflow.com/questions/1595611/how-to-properly-create-a-custom-object-in-javascript#1598077
- *
- * Puzzling problem to solve here:
- * - figure out inheritance such that Object.getOwnPropertyNames(Cube) returns properties a to f only
+ * Cube
  *
  * Created by johndoe on 29.12.2015.
  */
 var Face = require('./face');
-var Constants = require('./constants');
 var Util = require('./util');
 
-//todo make use of size to allow solving 4x4, 9x9 cubes
-var AbstractCube = function(size) {
-    this.size = size;
-};
-
 var Cube = function(size, stringRepresentation) {
-    AbstractCube.call(this, size);
     // todo refactor this with factory/template or something
     if (stringRepresentation) {
         var faces = stringRepresentation.split('|');
@@ -31,21 +20,11 @@ var Cube = function(size, stringRepresentation) {
     }
 };
 
-function inherits(superType) {
-    var tempConstructor = function () {};
-    tempConstructor.prototype = superType.prototype;
-    return new tempConstructor();
-}
-//Cube.prototype = Object.create(AbstractCube.prototype);
-Cube.prototype = inherits(AbstractCube);
-Cube.prototype.constructor = AbstractCube;
-
 Cube.prototype.shift = function (direction) {
-    // todo do we really need to keep size in cube??
-    var q = new Cube(this.size);
+    var q = new Cube(this.size());
 
     switch(direction) {
-        case 01:
+        case '12':
             q.a.horizontal(this.d, this.a);
             q.b.horizontal(this.a, this.b);
             q.c.horizontal(this.b, this.c);
@@ -53,7 +32,7 @@ Cube.prototype.shift = function (direction) {
             q.e = this.e;
             q.f = this.f;
             break;
-        case 10:
+        case '21':
             q.a.horizontal(this.b, this.a);
             q.b.horizontal(this.c, this.b);
             q.c.horizontal(this.d, this.c);
@@ -61,7 +40,7 @@ Cube.prototype.shift = function (direction) {
             q.e = this.e;
             q.f = this.f;
             break;
-        case 23:
+        case '34':
             q.a.horizontal(this.a, this.d);
             q.b.horizontal(this.b, this.a);
             q.c.horizontal(this.c, this.b);
@@ -69,7 +48,7 @@ Cube.prototype.shift = function (direction) {
             q.e = this.e;
             q.f = this.f;
             break;
-        case 32:
+        case '43':
             q.a.horizontal(this.a, this.b);
             q.b.horizontal(this.b, this.c);
             q.c.horizontal(this.c, this.d);
@@ -77,7 +56,7 @@ Cube.prototype.shift = function (direction) {
             q.e = this.e;
             q.f = this.f;
             break;
-        case 02:
+        case '13':
             q.a.vertical(this.f, this.a);
             q.b = this.b;
             q.c.vertical(this.e, this.c);
@@ -85,7 +64,7 @@ Cube.prototype.shift = function (direction) {
             q.e.vertical(this.a, this.e);
             q.f.vertical(this.c, this.f);
             break;
-        case 20:
+        case '31':
             q.a.vertical(this.e, this.a);
             q.b = this.b;
             q.c.vertical(this.f, this.c);
@@ -93,7 +72,7 @@ Cube.prototype.shift = function (direction) {
             q.e.vertical(this.c, this.e);
             q.f.vertical(this.a, this.f);
             break;
-        case 13:
+        case '24':
             q.a.vertical(this.a, this.f);
             q.b = this.b;
             q.c.vertical(this.c, this.e);
@@ -101,7 +80,7 @@ Cube.prototype.shift = function (direction) {
             q.e.vertical(this.e, this.a);
             q.f.vertical(this.f, this.c);
             break;
-        case 31:
+        case '42':
             q.a.vertical(this.a, this.e);
             q.b = this.b;
             q.c.vertical(this.c, this.f);
@@ -122,7 +101,7 @@ Cube.prototype.shift = function (direction) {
  * @param permutationEncodedString permutation encoded as a string
  */
 Cube.prototype.permutation = function (permutationEncodedString) {
-    var permutedCube = new Cube(this.size), label;
+    var permutedCube = new Cube(this.size()), label;
     for (var i = 0; i < permutationEncodedString.length; i++) {
         label = Util.decode(i);
         permutedCube[label] = this[permutationEncodedString.charAt(i)];
@@ -143,6 +122,13 @@ Cube.prototype.repaint = function (newLabelling) {
         repaintedCube[label] = Face.repaint(this[label], newLabelling);
     });
     return repaintedCube;
+};
+
+/**
+ * Size of this cube (ex. 2, 3)
+ */
+Cube.prototype.size = function () {
+    return this[Util.decode(0)].size;
 };
 
 /**

@@ -28,6 +28,14 @@ var Util = {
         return value;
     },
     /**
+     * Reverse string representing direction
+     *
+     * @param dir
+     */
+    reverseDirection: function (dir) {
+        return dir.split('').reverse().join('');
+    },
+    /**
      * Given a starting letter (@see Constants) it returns its normal (ie. 'abcdef') code
      *
      * @param letter
