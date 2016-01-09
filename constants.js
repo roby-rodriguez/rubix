@@ -6,6 +6,7 @@
 var Constants = {
     ENCODING_SIZE : 3,
     ENCODING_SIZE_LIMIT : 0x00000007,
+    ENCODING_BASIC: 'abcdef',
     START_LETTER : 'a',
     NR_OF_CUBE_FACES : 6,
     UPPER_WORD : {

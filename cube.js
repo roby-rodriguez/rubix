@@ -21,15 +21,13 @@ var Cube = function(size, stringRepresentation) {
     // todo refactor this with factory/template or something
     if (stringRepresentation) {
         var faces = stringRepresentation.split('|');
-        for (var i = 0; i < Constants.NR_OF_CUBE_FACES; i++) {
-            var label = Util.decode(i);
-            this[label] = Face.getByCode(faces[i], size);
-        }
+        Util.forEachLabel.call(this, function (label, index) {
+            this[label] = Face.getByCode(faces[index], size);
+        });
     } else {
-        for (var i = 0; i < Constants.NR_OF_CUBE_FACES; i++) {
-            var label = Util.decode(i);
-            this[label] = new Face(i, size);
-        }
+        Util.forEachLabel.call(this, function (label, index) {
+            this[label] = new Face(index, size);
+        });
     }
 };
 
@@ -141,40 +139,12 @@ Cube.prototype.permutation = function (permutationEncodedString) {
  */
 Cube.prototype.repaint = function (newLabelling) {
     var repaintedCube = new Cube(this.size);
-    //todo extract this to Util and apply a foreach on resulting array
-    for (var i = 0; i < Constants.NR_OF_CUBE_FACES; i++) {
-        var label = Util.decode(i);
+    Util.forEachLabel.call(this, function (label) {
         repaintedCube[label] = Face.repaint(this[label], newLabelling);
-    }
+    });
     return repaintedCube;
 };
 
-// todo if you remove size/and-or abstract cube then comment the following two methods
-Cube.prototype.hasOwnProperty = function(propertyName) {
-    var a = Object.prototype.hasOwnProperty.call(this, propertyName);
-    var b = Object.prototype.hasOwnProperty.call(new AbstractCube(), propertyName);
-    return a && !b;
-};
-
-Cube.prototype.getOwnPropertyNames = function () {
-    return Object.getOwnPropertyNames(this).filter(Cube.prototype.hasOwnProperty.bind(this));
-};
-
-/*
-Cube.prototype.hash = function () {
-    var weights = { a : 17, b : 2, c : 7, d : 13, e : 29, f : 41 };
-    var sum = 0, partial, self = this;
-
-    this.getOwnPropertyNames().forEach(function (val, idx, array) {
-        partial = 0;
-        for (var i = 0; i < self[val].length; i++)
-            partial += weights[self[val][i]] - weights[self[val][0]];
-        sum += weights[val] * partial;
-    });
-
-    return sum;
-};
- */
 /**
  * String representation of this cube. If a codification is given it will be used, having
  * the effect of repainting the cube.
@@ -183,10 +153,9 @@ Cube.prototype.hash = function () {
  * @returns {string}
  */
 Cube.prototype.toString = function (codification) {
-    var str = '', self = this;
-    //todo this can be replaced by for with label decode -> see constructor
-    this.getOwnPropertyNames().forEach(function (val, idx, array) {
-        str += idx ? '|' + self[val].toString(codification) : self[val].toString(codification);
+    var str = '';
+    Util.forEachLabel.call(this, function (label, index) {
+        str += index ? '|' + this[label].toString(codification) : this[label].toString(codification);
     });
     return str;
 };

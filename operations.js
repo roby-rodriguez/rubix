@@ -90,7 +90,7 @@ function iterateSearch(q) {
     var existing, existingState, qparent, state = q.toString();
     if ( (existing = states[state] || states[existingState = checkExists(q)] ) !== undefined) {
         if (existing.value) {
-            console.log(state + ' ' + existing.parent);
+            console.log(state + ' ' + existing.parent + (existingState ? ' alternate' : ''));
             if (existingState) // we found a matching alternate state
                 q = new Cube(2, existingState);
             qparent = q.shift(existing.parent);
@@ -107,5 +107,13 @@ module.exports = {
     },
     solve: function (state) {
         iterateSearch(new Cube(2, state));
+    },
+    shuffle: function (times) {
+        var q = new Cube(2), dir;
+        for (var i = 0; i < times; i++) {
+            dir = Math.floor(Math.random() * directions.length);
+            q = q.shift(directions[dir]);
+        }
+        return q.toString();
     }
 };

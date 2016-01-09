@@ -1,7 +1,7 @@
 /**
  * Created by johndoe on 04.01.2016.
  */
-var base = 'abcdef';
+var base = require('./constants').ENCODING_BASIC;
 
 function correct(permutation) {
     var dups = {};

@@ -54,6 +54,19 @@ var Util = {
      */
     transcode: function(number, newLabelling) {
         return Util.encode(newLabelling[number]);
+    },
+    /**
+     * Iterates each label of a given encoding and calls the activity function
+     * If no encoding is given, the default is used
+     *
+     * @param activity
+     * @param encoding
+     */
+    forEachLabel: function (activity, encoding) {
+        var codification = encoding ? encoding : Constants.ENCODING_BASIC, self = this;
+        codification.split('').forEach(function (label, index) {
+            activity.call(self, label, index);
+        });
     }
 };
 
