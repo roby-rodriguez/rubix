@@ -149,7 +149,7 @@ Cube.prototype.permutation = function (permutationEncodedString) {
  * @param newLabelling new labelling
  */
 Cube.prototype.repaint = function (newLabelling) {
-    var repaintedCube = new Cube(this.size);
+    var repaintedCube = new Cube(this.size());
     Util.forEachLabel.call(this, function (label) {
         repaintedCube[label] = Face.repaint(this[label], newLabelling);
     });

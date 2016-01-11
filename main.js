@@ -17,3 +17,6 @@ console.log('Solver: ');
 
 Operations.solve('fbfa|ccbb|edec|aadd|beae|dfcf');
 Operations.solve(Operations.shuffle(2));
+
+//todo fix this case - wrong mask in horizontal:
+//fafa|ddbb|ecec|bbdd|ceae|afcf -> shift 12 == bbaa|fabb|ddcc|ecdd|ceae|afcf

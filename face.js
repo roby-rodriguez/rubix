@@ -84,7 +84,6 @@ Face.prototype.horizontal = function (replacement, index) {
 Face.prototype.vertical = function (replacement, index) {
     var mask = 0, antimask;
     for (var i = 0; i < this.size; i++)
-        //mask |= Constants.ENCODING_SIZE_LIMIT << (i + this.size - index - 1) * Constants.ENCODING_SIZE;
         mask |= Constants.ENCODING_SIZE_LIMIT << i * this.size * Constants.ENCODING_SIZE + (this.size - index - 1) * Constants.ENCODING_SIZE;
     antimask = Constants.WORD_LIMIT[this.size] ^ mask;
     this.value = (this.value & antimask) | (replacement.value & mask);
