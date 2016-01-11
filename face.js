@@ -24,11 +24,18 @@ var Face = function (seed, size) {
     }
 };
 
+/**
+ * Creates a face (normal encoding) given the decoded string
+ * ex. edbb -> 100 011 001 001
+ *
+ * @param decodedString
+ * @param size
+ * @returns {Face}
+ */
 Face.getByCode = function (decodedString, size) {
-    var face = Object.create(Face.prototype);
-    face.size = size;
-    for (var i = decodedString.length - 1; i >= 0; i--) {
-        face.value |= Util.encode(decodedString.charAt(i));
+    var face = Object.create(Face.prototype), i;
+    for (face.size = size, i = decodedString.length - 1; i >= 0; i--) {
+        face.value |= Util.encode(decodedString.charAt(decodedString.length - 1 - i));
         if (i)
             face.value <<= Constants.ENCODING_SIZE;
     }
@@ -45,12 +52,10 @@ Face.getByCode = function (decodedString, size) {
  * @returns {Face}
  */
 Face.repaint = function (original, newLabelling) {
-    var face = Object.create(Face.prototype);
-    face.size = original.size;
-    var originalValue = Util.reverse(original), i;
-    for (face.value = 0, i = original.size * original.size - 1; i >= 0; i--) {
-        face.value |= Util.transcode(originalValue & Constants.ENCODING_SIZE_LIMIT, newLabelling);
-        originalValue >>= Constants.ENCODING_SIZE;
+    var face = Object.create(Face.prototype), value, i;
+    for (face.size = original.size, face.value = 0, i = original.size * original.size - 1; i >= 0; i--) {
+        value = Util.strip(original.value >> i * Constants.ENCODING_SIZE);
+        face.value |= Util.transcode(value, newLabelling);
         if (i)
             face.value <<= Constants.ENCODING_SIZE;
     }
@@ -58,31 +63,31 @@ Face.repaint = function (original, newLabelling) {
 };
 
 /**
- * Operation resulting from a horizontal twist of the cube. Equates to:
- * cube[this] = cube[up](0, 2) + cube[down](2, 4)
+ * Operation resulting from a horizontal twist of the cube
+ * The value remains the same except for the displacement which takes its value from
+ * the same region in 'replacement'
  *
- * @param up upper side
- * @param down lower side
+ * @param replacement face used replace this row
+ * @param index row to replace
  */
-Face.prototype.horizontal = function (up, down) {
-    this.value = (up.value & Constants.LOWER_WORD[this.size]) |
-        (down.value & Constants.UPPER_WORD[this.size]);
-    //this.value &= (Constants.UPPER_WORD[this.size] | Constants.LOWER_WORD[this.size]);
+Face.prototype.horizontal = function (replacement, index) {
+    this.value = (this.value & (Constants.WORD_LIMIT[this.size] ^ Constants.WORDS[this.size][index])) |
+        (replacement.value & Constants.WORDS[this.size][index]);
 };
 
 /**
- * Operation resulting from a vertical twist of the cube. Equates to:
- * cube[this] = cube[left](0) + cube[right](1) + cube[left](2) + cube[right](3)
+ * Operation resulting from a vertical twist of the cube
  *
- * @param left left-hand side
- * @param right right-hand side
+ * @param replacement face used replace this column
+ * @param index column to replace
  */
-Face.prototype.vertical = function (left, right) {
-    this.value = (left.value & Constants.ENCODING_SIZE_LIMIT) | // left(0)
-        (right.value & (Constants.ENCODING_SIZE_LIMIT << Constants.ENCODING_SIZE)) | // left(1)
-        (left.value & (Constants.ENCODING_SIZE_LIMIT << (2 * Constants.ENCODING_SIZE))) | // left(2)
-        (right.value & (Constants.ENCODING_SIZE_LIMIT << (3 * Constants.ENCODING_SIZE))); // left(3)
-    //this.value &= (Constants.UPPER_WORD[this.size] | Constants.LOWER_WORD[this.size]);
+Face.prototype.vertical = function (replacement, index) {
+    var mask = 0, antimask;
+    for (var i = 0; i < this.size; i++)
+        //mask |= Constants.ENCODING_SIZE_LIMIT << (i + this.size - index - 1) * Constants.ENCODING_SIZE;
+        mask |= Constants.ENCODING_SIZE_LIMIT << i * this.size * Constants.ENCODING_SIZE + (this.size - index - 1) * Constants.ENCODING_SIZE;
+    antimask = Constants.WORD_LIMIT[this.size] ^ mask;
+    this.value = (this.value & antimask) | (replacement.value & mask);
 };
 
 /**
@@ -93,10 +98,10 @@ Face.prototype.vertical = function (left, right) {
  * @returns {string}
  */
 Face.prototype.toString = function (codification) {
-    var str = '', count = this.size * this.size, value = this.value;
-    while (count--) {
-        str += Util.decode(codification? Util.transcode(Util.strip(value), codification) : Util.strip(value));
-        value >>= Constants.ENCODING_SIZE;
+    var str = '', count = this.size * this.size, value;
+    for (var i = count - 1; i >= 0; i--) {
+        value = Util.strip(this.value >> i * Constants.ENCODING_SIZE);
+        str += Util.decode(codification? Util.transcode(value, codification) : value);
     }
     return str;
 };

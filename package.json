@@ -1,0 +1,23 @@
+{
+  "name": "rubix",
+  "version": "0.0.1",
+  "description": "An approach to solve the Rubik cube.",
+  "main": "main.js",
+  "author": "RobyRodriguez",
+  "bugs" : {
+    "url" : "https://github.com/roby-rodriguez/rubix/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/roby-rodriguez/rubix.git"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha":  "*",
+    "chai":   "*"
+  },
+  "scripts": {
+    "test": "mocha test"
+  }
+}

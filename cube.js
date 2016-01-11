@@ -25,68 +25,100 @@ Cube.prototype.shift = function (direction) {
 
     switch(direction) {
         case '12':
-            q.a.horizontal(this.d, this.a);
-            q.b.horizontal(this.a, this.b);
-            q.c.horizontal(this.b, this.c);
-            q.d.horizontal(this.c, this.d);
+            q.a.horizontal(this.d, 0);
+            q.b.horizontal(this.a, 0);
+            q.c.horizontal(this.b, 0);
+            q.d.horizontal(this.c, 0);
             q.e = this.e;
             q.f = this.f;
             break;
         case '21':
-            q.a.horizontal(this.b, this.a);
-            q.b.horizontal(this.c, this.b);
-            q.c.horizontal(this.d, this.c);
-            q.d.horizontal(this.a, this.d);
+            q.a.horizontal(this.b, 0);
+            q.b.horizontal(this.c, 0);
+            q.c.horizontal(this.d, 0);
+            q.d.horizontal(this.a, 0);
             q.e = this.e;
             q.f = this.f;
             break;
         case '34':
-            q.a.horizontal(this.a, this.d);
-            q.b.horizontal(this.b, this.a);
-            q.c.horizontal(this.c, this.b);
-            q.d.horizontal(this.d, this.c);
+            q.a.horizontal(this.d, 1);
+            q.b.horizontal(this.a, 1);
+            q.c.horizontal(this.b, 1);
+            q.d.horizontal(this.c, 1);
             q.e = this.e;
             q.f = this.f;
             break;
         case '43':
-            q.a.horizontal(this.a, this.b);
-            q.b.horizontal(this.b, this.c);
-            q.c.horizontal(this.c, this.d);
-            q.d.horizontal(this.d, this.a);
+            q.a.horizontal(this.b, 1);
+            q.b.horizontal(this.c, 1);
+            q.c.horizontal(this.d, 1);
+            q.d.horizontal(this.a, 1);
+            q.e = this.e;
+            q.f = this.f;
+            break;
+        case '68':
+            q.a.horizontal(this.d, 2);
+            q.b.horizontal(this.a, 2);
+            q.c.horizontal(this.b, 2);
+            q.d.horizontal(this.c, 2);
+            q.e = this.e;
+            q.f = this.f;
+            break;
+        case '86':
+            q.a.horizontal(this.b, 2);
+            q.b.horizontal(this.c, 2);
+            q.c.horizontal(this.d, 2);
+            q.d.horizontal(this.a, 2);
             q.e = this.e;
             q.f = this.f;
             break;
         case '13':
-            q.a.vertical(this.f, this.a);
+            q.a.vertical(this.f, 0);
             q.b = this.b;
-            q.c.vertical(this.e, this.c);
+            q.c.vertical(this.e, 0);
             q.d = this.d;
-            q.e.vertical(this.a, this.e);
-            q.f.vertical(this.c, this.f);
+            q.e.vertical(this.a, 0);
+            q.f.vertical(this.c, 0);
             break;
         case '31':
-            q.a.vertical(this.e, this.a);
+            q.a.vertical(this.e, 0);
             q.b = this.b;
-            q.c.vertical(this.f, this.c);
+            q.c.vertical(this.f, 0);
             q.d = this.d;
-            q.e.vertical(this.c, this.e);
-            q.f.vertical(this.a, this.f);
+            q.e.vertical(this.c, 0);
+            q.f.vertical(this.a, 0);
             break;
         case '24':
-            q.a.vertical(this.a, this.f);
+            q.a.vertical(this.f, 1);
             q.b = this.b;
-            q.c.vertical(this.c, this.e);
+            q.c.vertical(this.e, 1);
             q.d = this.d;
-            q.e.vertical(this.e, this.a);
-            q.f.vertical(this.f, this.c);
+            q.e.vertical(this.a, 1);
+            q.f.vertical(this.c, 1);
             break;
         case '42':
-            q.a.vertical(this.a, this.e);
+            q.a.vertical(this.e, 1);
             q.b = this.b;
-            q.c.vertical(this.c, this.f);
+            q.c.vertical(this.f, 1);
             q.d = this.d;
-            q.e.vertical(this.e, this.c);
-            q.f.vertical(this.f, this.a);
+            q.e.vertical(this.c, 1);
+            q.f.vertical(this.a, 1);
+            break;
+        case '57':
+            q.a.vertical(this.f, 2);
+            q.b = this.b;
+            q.c.vertical(this.e, 2);
+            q.d = this.d;
+            q.e.vertical(this.a, 2);
+            q.f.vertical(this.c, 2);
+            break;
+        case '75':
+            q.a.vertical(this.e, 2);
+            q.b = this.b;
+            q.c.vertical(this.f, 2);
+            q.d = this.d;
+            q.e.vertical(this.c, 2);
+            q.f.vertical(this.a, 2);
             break;
         default:
             break;

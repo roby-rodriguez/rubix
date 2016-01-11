@@ -69,7 +69,7 @@ function iterateConstruct(q, step, lastDir) {
         for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
             var curDir = Constants.DIRECTIONS[q.size()][i];
             shifted = q.shift(curDir);
-            iterateConstruct(shifted, step + 1, Util.reverseDirection(curDir));
+            iterateConstruct(shifted, step + 1, Util.reverseString(curDir));
         }
     }
 }

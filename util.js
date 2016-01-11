@@ -28,12 +28,13 @@ var Util = {
         return value;
     },
     /**
-     * Reverse string representing direction
+     * Reverse string
+     * ex. 'abcd' -> 'dcba'
      *
-     * @param dir
+     * @param str
      */
-    reverseDirection: function (dir) {
-        return dir.split('').reverse().join('');
+    reverseString: function (str) {
+        return str.split('').reverse().join('');
     },
     /**
      * Given a starting letter (@see Constants) it returns its normal (ie. 'abcdef') code
