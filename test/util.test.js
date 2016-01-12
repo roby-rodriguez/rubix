@@ -30,13 +30,13 @@ describe("Test utilities", function () {
     it("reverse face 1", function () {
         // 001 000 010 010 = 530
         // 010 010 000 001 = 1153
-        var face = createFace(530, 2);
+        var face = createFace(530, 4);
         expect(Util.reverse(face)).to.equal(1153);
     });
     it("reverse face 2", function () {
         // 100 011 001 001 = 2249
         // 001 001 011 100 = 604
-        var face = createFace(2249, 2);
+        var face = createFace(2249, 4);
         expect(Util.reverse(face)).to.equal(604);
     });
 });

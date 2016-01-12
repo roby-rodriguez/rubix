@@ -16,10 +16,9 @@ var Util = require('./util');
 var Face = function (seed, size) {
     this.size = size;
     seed = Util.strip(seed);
-    var area = size * size;
-    while (area) {
+    while (size) {
         this.value |= seed;
-        if (--area)
+        if (--size)
             this.value <<= Constants.ENCODING_SIZE;
     }
 };
@@ -29,12 +28,11 @@ var Face = function (seed, size) {
  * ex. edbb -> 100 011 001 001
  *
  * @param decodedString
- * @param size
  * @returns {Face}
  */
-Face.getByCode = function (decodedString, size) {
+Face.getByCode = function (decodedString) {
     var face = Object.create(Face.prototype), i;
-    for (face.size = size, i = decodedString.length - 1; i >= 0; i--) {
+    for (face.size = decodedString.length, i = decodedString.length - 1; i >= 0; i--) {
         face.value |= Util.encode(decodedString.charAt(decodedString.length - 1 - i));
         if (i)
             face.value <<= Constants.ENCODING_SIZE;
@@ -60,7 +58,7 @@ Face.prototype.clone = function () {
  */
 Face.repaint = function (original, newLabelling) {
     var face = Object.create(Face.prototype), value, i;
-    for (face.size = original.size, face.value = 0, i = original.size * original.size - 1; i >= 0; i--) {
+    for (face.size = original.size, face.value = 0, i = original.size - 1; i >= 0; i--) {
         value = Util.strip(original.value >> i * Constants.ENCODING_SIZE);
         face.value |= Util.transcode(value, newLabelling);
         if (i)
@@ -89,9 +87,9 @@ Face.prototype.horizontal = function (replacement, index) {
  * @param index column to replace
  */
 Face.prototype.vertical = function (replacement, index) {
-    var mask = 0, antimask;
-    for (var i = 0; i < this.size; i++)
-        mask |= Constants.ENCODING_SIZE_LIMIT << i * this.size * Constants.ENCODING_SIZE + (this.size - index - 1) * Constants.ENCODING_SIZE;
+    var mask = 0, antimask, width = Constants.WIDTH[this.size];
+    for (var i = 0; i < width; i++)
+        mask |= Constants.ENCODING_SIZE_LIMIT << i * width * Constants.ENCODING_SIZE + (width - index - 1) * Constants.ENCODING_SIZE;
     antimask = Constants.WORD_LIMIT[this.size] ^ mask;
     this.value = (this.value & antimask) | (replacement.value & mask);
 };
@@ -104,8 +102,8 @@ Face.prototype.vertical = function (replacement, index) {
  * @returns {string}
  */
 Face.prototype.toString = function (codification) {
-    var str = '', count = this.size * this.size, value;
-    for (var i = count - 1; i >= 0; i--) {
+    var str = '', value;
+    for (var i = this.size - 1; i >= 0; i--) {
         value = Util.strip(this.value >> i * Constants.ENCODING_SIZE);
         str += Util.decode(codification? Util.transcode(value, codification) : value);
     }

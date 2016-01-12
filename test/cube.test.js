@@ -10,19 +10,19 @@ var expect = require("chai").expect;
 describe("Test cube", function () {
     it("constructor with encoding 2 x 2", function () {
         var decoded = 'edbb|bacc|fbdd|dcaa|ceee|afff';
-        var cube = new Cube(2, decoded);
+        var cube = new Cube(decoded);
         expect(cube.toString()).to.equal(decoded);
     });
     it("repainting == toString(encoding) 2 x 2", function () {
         var newLabelling = 'badcfe';
         var decoded = 'edbb|bacc|fbdd|dcaa|ceee|afff';
-        var cube = new Cube(2, decoded);
+        var cube = new Cube(decoded);
         var repainted = cube.repaint(newLabelling);
         expect(repainted.toString()).to.equal(cube.toString(newLabelling));
     });
     it("twist horizontally 2 x 2", function () {
         var cube, shifted, shiftedBack;
-        cube = new Cube(2); // 'aaaa|bbbb|cccc|dddd|eeee|ffff'
+        cube = new Cube(4); // 'aaaa|bbbb|cccc|dddd|eeee|ffff'
 
         shifted = cube.shift('12');
         expect(shifted.toString()).to.equal('ddaa|aabb|bbcc|ccdd|eeee|ffff');
@@ -36,7 +36,7 @@ describe("Test cube", function () {
     });
     it("twist vertically 2 x 2", function () {
         var cube, shifted, shiftedBack;
-        cube = new Cube(2); // 'aaaa|bbbb|cccc|dddd|eeee|ffff'
+        cube = new Cube(4); // 'aaaa|bbbb|cccc|dddd|eeee|ffff'
 
         shifted = cube.shift('13');
         expect(shifted.toString()).to.equal('fafa|bbbb|ecec|dddd|aeae|cfcf');
@@ -50,7 +50,7 @@ describe("Test cube", function () {
     });
     it("twist horizontally 3 x 3", function () {
         var cube, shifted, shiftedBack;
-        cube = new Cube(3); // 'aaaaaaaaa|bbbbbbbbb|ccccccccc|ddddddddd|eeeeeeeee|fffffffff'
+        cube = new Cube(9); // 'aaaaaaaaa|bbbbbbbbb|ccccccccc|ddddddddd|eeeeeeeee|fffffffff'
 
         shifted = cube.shift('12');
         expect(shifted.toString()).to.equal('dddaaaaaa|aaabbbbbb|bbbcccccc|cccdddddd|eeeeeeeee|fffffffff');
@@ -69,7 +69,7 @@ describe("Test cube", function () {
     });
     it("twist vertically 3 x 3", function () {
         var cube, shifted, shiftedBack;
-        cube = new Cube(3); // 'aaaaaaaaa|bbbbbbbbb|ccccccccc|ddddddddd|eeeeeeeee|fffffffff'
+        cube = new Cube(9); // 'aaaaaaaaa|bbbbbbbbb|ccccccccc|ddddddddd|eeeeeeeee|fffffffff'
 
         shifted = cube.shift('13');
         expect(shifted.toString()).to.equal('faafaafaa|bbbbbbbbb|ecceccecc|ddddddddd|aeeaeeaee|cffcffcff');

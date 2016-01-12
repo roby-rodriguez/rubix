@@ -26,7 +26,7 @@ function correct(permutation) {
 }
 
 function permutation(str, arr) {
-    if (str.length == 6)
+    if (str.length == require('./constants').NR_OF_CUBE_FACES)
         arr.push(str);
     for (var i = 0; i < base.length; i++) {
         var newStr = str + base.charAt(i);

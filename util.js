@@ -20,8 +20,8 @@ var Util = {
      * @returns {number}
      */
     reverse: function(face) {
-        var value, original = face.value, area = face.size * face.size;
-        for (var i = area - 1; i >= 0; i--) {
+        var value, original = face.value;
+        for (var i = face.size - 1; i >= 0; i--) {
             value |= (original & Constants.ENCODING_SIZE_LIMIT);
             if (i) { value <<= Constants.ENCODING_SIZE; original >>= Constants.ENCODING_SIZE; }
         }

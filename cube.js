@@ -6,14 +6,14 @@
 var Face = require('./face');
 var Util = require('./util');
 
-var Cube = function(size, stringRepresentation) {
-    // todo refactor this with factory/template or something
-    if (stringRepresentation) {
-        var faces = stringRepresentation.split('|');
+var Cube = function() {
+    if (typeof arguments[0] == 'string') {
+        var faces = arguments[0].split('|');
         Util.forEachLabel.call(this, function (label, index) {
-            this[label] = Face.getByCode(faces[index], size);
+            this[label] = Face.getByCode(faces[index]);
         });
-    } else {
+    } else if (typeof arguments[0] == 'number') {
+        var size = arguments[0];
         Util.forEachLabel.call(this, function (label, index) {
             this[label] = new Face(index, size);
         });
@@ -22,7 +22,7 @@ var Cube = function(size, stringRepresentation) {
 
 Cube.prototype.clone = function () {
     var q = Object.create(Cube.prototype);
-    Util.forEachLabel.call(this, function (label, index) {
+    Util.forEachLabel.call(this, function (label) {
         q[label] = this[label].clone();
     });
     return q;
