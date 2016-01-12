@@ -20,8 +20,16 @@ var Cube = function(size, stringRepresentation) {
     }
 };
 
+Cube.prototype.clone = function () {
+    var q = Object.create(Cube.prototype);
+    Util.forEachLabel.call(this, function (label, index) {
+        q[label] = this[label].clone();
+    });
+    return q;
+};
+
 Cube.prototype.shift = function (direction) {
-    var q = new Cube(this.size());
+    var q = this.clone();
 
     switch(direction) {
         case '12':
@@ -133,7 +141,7 @@ Cube.prototype.shift = function (direction) {
  * @param permutationEncodedString permutation encoded as a string
  */
 Cube.prototype.permutation = function (permutationEncodedString) {
-    var permutedCube = new Cube(this.size()), label;
+    var permutedCube = Object.create(Cube.prototype), label;
     for (var i = 0; i < permutationEncodedString.length; i++) {
         label = Util.decode(i);
         permutedCube[label] = this[permutationEncodedString.charAt(i)];
@@ -149,7 +157,7 @@ Cube.prototype.permutation = function (permutationEncodedString) {
  * @param newLabelling new labelling
  */
 Cube.prototype.repaint = function (newLabelling) {
-    var repaintedCube = new Cube(this.size());
+    var repaintedCube = Object.create(Cube.prototype);
     Util.forEachLabel.call(this, function (label) {
         repaintedCube[label] = Face.repaint(this[label], newLabelling);
     });

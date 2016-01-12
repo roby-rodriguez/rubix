@@ -42,6 +42,13 @@ Face.getByCode = function (decodedString, size) {
     return face;
 };
 
+Face.prototype.clone = function () {
+    var f = Object.create(Face.prototype);
+    f.size = this.size;
+    f.value = this.value;
+    return f;
+};
+
 /**
  * Repaint this original face (in normal encoding - 'abcdef') given an alternate
  * encoding and return the obtained face - used in cube construction, alternatively
