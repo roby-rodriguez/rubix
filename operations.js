@@ -9,6 +9,7 @@ var Constants = require('./constants');
 var Util = require('./util');
 var Cube = require('./cube');
 var states = {};
+var CUBE_WIDTH = 4;
 
 /**
  * Given original state 'a|b|c|d|e|f' (representing the cube), the following permutations are equivalent:
@@ -73,8 +74,6 @@ function iterateConstruct(q, step, lastDir) {
         }
     }
 }
-//iterateConstruct(new Cube(3), 0);
-iterateConstruct(new Cube(4), 0);
 
 function iterateSearch(q) {
     var existing, existingState, qparent, state = q.toString();
@@ -93,17 +92,22 @@ function iterateSearch(q) {
 
 module.exports = {
     getStates : function () {
+        if (!Object.keys(states).length)
+            iterateConstruct(new Cube(CUBE_WIDTH), 0);
         return states;
     },
     solve: function (state) {
         iterateSearch(new Cube(state));
     },
     shuffle: function (times) {
-        var q = new Cube(4), dir;
+        var q = new Cube(CUBE_WIDTH), dir;
         for (var i = 0; i < times; i++) {
             dir = Math.floor(Math.random() * Constants.DIRECTIONS[q.size()].length);
             q = q.shift(Constants.DIRECTIONS[q.size()][dir]);
         }
         return q.toString();
+    },
+    workingWidth: function (width) {
+        if (width) CUBE_WIDTH = width;
     }
 };

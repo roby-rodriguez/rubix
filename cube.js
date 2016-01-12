@@ -141,11 +141,10 @@ Cube.prototype.shift = function (direction) {
  * @param permutationEncodedString permutation encoded as a string
  */
 Cube.prototype.permutation = function (permutationEncodedString) {
-    var permutedCube = Object.create(Cube.prototype), label;
-    for (var i = 0; i < permutationEncodedString.length; i++) {
-        label = Util.decode(i);
-        permutedCube[label] = this[permutationEncodedString.charAt(i)];
-    }
+    var permutedCube = Object.create(Cube.prototype);
+    Util.forEachLabel.call(this, function (label, index) {
+        permutedCube[label] = this[permutationEncodedString.charAt(index)];
+    });
     return permutedCube;
 };
 
@@ -165,7 +164,7 @@ Cube.prototype.repaint = function (newLabelling) {
 };
 
 /**
- * Size of this cube (ex. 2, 3)
+ * Size of this cube (ex. 4, 9)
  */
 Cube.prototype.size = function () {
     return this[Util.decode(0)].size;
