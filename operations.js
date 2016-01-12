@@ -47,16 +47,13 @@ function checkExists(q) {
     }
 }
 
-function iterateConstruct(q, step, lastDir) {
-    var shifted, currentState = q.toString(), existingState;
-
-    // todo refactor this bullshit if it stays
+function checkExistsAndStore(currentState, existingState, step, lastDir, activity) {
     if (states[currentState] !== undefined) {
         if (step < states[currentState].value) {
             states[currentState].value = step;
             states[currentState].parent = lastDir;
         }
-    } else if (states[existingState = checkExists(q)] !== undefined ) {
+    } else if (states[existingState] !== undefined ) {
         if (step < states[existingState].value) {
             delete states[existingState];
             states[currentState] = {};
@@ -67,11 +64,45 @@ function iterateConstruct(q, step, lastDir) {
         states[currentState] = {};
         states[currentState].value = step;
         states[currentState].parent = lastDir;
-        for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
-            var curDir = Constants.DIRECTIONS[q.size()][i];
-            shifted = q.shift(curDir);
-            iterateConstruct(shifted, step + 1, Util.reverseString(curDir));
+        activity();
+    }
+}
+
+function iterateConstructRec(q, step, lastDir) {
+    var shifted, currentState = q.toString(), existingState = checkExists(q);
+
+    checkExistsAndStore(currentState, existingState, step, lastDir,
+        function () {
+            for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
+                var curDir = Constants.DIRECTIONS[q.size()][i];
+                shifted = q.shift(curDir);
+                iterateConstructRec(shifted, step + 1, Util.reverseString(curDir));
+            }
         }
+    );
+}
+
+function iterateConstruct() {
+    var pending = [ { q: new Cube(CUBE_WIDTH), step : -1 } ];
+    var q, qObj, step, lastDir;
+
+    while (pending.length) {
+        qObj = pending.pop(); q = qObj.q; lastDir = qObj.dir; step = qObj.step;
+        var shifted, currentState = q.toString(), existingState = checkExists(q);
+
+        checkExistsAndStore(currentState, existingState, ++step, lastDir,
+            function () {
+                for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
+                    var curDir = Constants.DIRECTIONS[q.size()][i];
+                    shifted = q.shift(curDir);
+                    pending.push({
+                        q: shifted,
+                        dir: Util.reverseString(curDir),
+                        step: step
+                    });
+                }
+            }
+        );
     }
 }
 
@@ -93,7 +124,8 @@ function iterateSearch(q) {
 module.exports = {
     getStates : function () {
         if (!Object.keys(states).length)
-            iterateConstruct(new Cube(CUBE_WIDTH), 0);
+            //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
+            iterateConstruct();
         return states;
     },
     solve: function (state) {
