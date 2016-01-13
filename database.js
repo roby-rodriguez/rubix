@@ -11,10 +11,7 @@ var db;
 function connect () {
     var deferred = Q.defer();
     if (!db) {
-        MongoClient.connect("mongodb://localhost:27017/rubix", function (err, database) {
-            if (err) deferred.reject(new Error(err));
-            else deferred.resolve(database);
-        });
+        MongoClient.connect("mongodb://localhost:27017/rubix", deferred.makeNodeResolver());
     } else {
         deferred.resolve(db);
     }
