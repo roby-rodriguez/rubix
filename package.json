@@ -1,6 +1,7 @@
 {
   "name": "rubix",
   "version": "0.0.1",
+  "license": "MIT",
   "description": "An approach to solve the Rubik cube.",
   "main": "main.js",
   "author": "RobyRodriguez",
@@ -14,8 +15,11 @@
   "dependencies": {
   },
   "devDependencies": {
-    "mocha":  "*",
-    "chai":   "*"
+    "mocha":            "*",
+    "chai":             "*",
+    "chai-as-promised": "*",
+    "mongodb":          "*",
+    "q":                "*"
   },
   "scripts": {
     "test": "mocha test"
