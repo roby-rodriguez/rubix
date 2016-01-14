@@ -38,6 +38,8 @@ var labelPermutations = require('./generator');
  * @param q current state
  */
 function checkExists(q) {
+    if (states.hasOwnProperty(q.toString()))
+        return q.toString();
     for (var j = 0; j < labelPermutations.length; j++) {
         for (var i = 0; i < cubePermutations.length; i++) {
             var permutationString = q.permutation(cubePermutations[i]).toString(labelPermutations[j]);
@@ -47,18 +49,11 @@ function checkExists(q) {
     }
 }
 
-function checkExistsAndStore(currentState, existingState, step, lastDir, activity) {
-    if (states[currentState] !== undefined) {
+function checkExistsAndStore(currentState, step, lastDir, activity) {
+    if (states[currentState]) {
         if (step < states[currentState].value) {
             states[currentState].value = step;
             states[currentState].parent = lastDir;
-        }
-    } else if (states[existingState] !== undefined ) {
-        if (step < states[existingState].value) {
-            delete states[existingState];
-            states[currentState] = {};
-            states[currentState].value = step;
-            states[currentState].parent = lastDir; // not sure about this one
         }
     } else {
         states[currentState] = {};
@@ -69,9 +64,9 @@ function checkExistsAndStore(currentState, existingState, step, lastDir, activit
 }
 
 function iterateConstructRec(q, step, lastDir) {
-    var shifted, currentState = q.toString(), existingState = checkExists(q);
+    var shifted, currentState = checkExists(q) || q.toString();
 
-    checkExistsAndStore(currentState, existingState, step, lastDir,
+    checkExistsAndStore(currentState, step, lastDir,
         function () {
             for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
                 var curDir = Constants.DIRECTIONS[q.size()][i];
@@ -88,9 +83,9 @@ function iterateConstruct() {
 
     while (pending.length) {
         qObj = pending.pop(); q = qObj.q; lastDir = qObj.dir; step = qObj.step;
-        var shifted, currentState = q.toString(), existingState = checkExists(q);
+        var shifted, currentState = checkExists(q) || q.toString();
 
-        checkExistsAndStore(currentState, existingState, ++step, lastDir,
+        checkExistsAndStore(currentState, ++step, lastDir,
             function () {
                 for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
                     var curDir = Constants.DIRECTIONS[q.size()][i];
@@ -107,24 +102,23 @@ function iterateConstruct() {
 }
 
 function iterateSearch(q) {
-    var existing, existingState, qparent, state = q.toString();
-    if ( (existing = states[state] || states[existingState = checkExists(q)] ) !== undefined) {
-        if (existing.value) {
-            console.log(state + ' ' + existing.parent + (existingState ? ' alternate' : ''));
-            if (existingState) // we found a matching alternate state
-                q = new Cube(existingState);
-            qparent = q.shift(existing.parent);
+    // todo replace existingState with state.key
+    var existingState = checkExists(q) || q.toString(), qparent;
+    if (states[existingState]) {
+        if (states[existingState].value) {
+            console.log(existingState + ' ' + states[existingState].parent);
+            qparent = q.shift(states[existingState].parent);
             iterateSearch(qparent);
         } else
-            console.log(state);
+            console.log(existingState);
     } else
-        console.error('Missing state: ' + state);
+        console.error('Missing state: ' + existingState);
 }
 
 module.exports = {
     getStates : function () {
         if (!Object.keys(states).length)
-            //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
+        //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
             iterateConstruct();
         return states;
     },
