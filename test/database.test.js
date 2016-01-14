@@ -19,12 +19,12 @@ var state = {
 
 describe("Test database operations", function () {
     it("add", function () {
-        return Database.find(state, size).should.eventually.equal(null)
+        return Database.find(state.key, size).should.eventually.equal(null)
             .then(function () {
                 return Database.add(state, size);
             })
             .then(function () {
-                return Database.find(state, size);
+                return Database.find(state.key, size);
             }).should.eventually.have.property('key').that.equals(state.key);
     });
     it("update", function () {
@@ -33,12 +33,12 @@ describe("Test database operations", function () {
         newState.step = 2;
         newState.parent = '12';
 
-        return Database.find(state, size)
+        return Database.find(state.key, size)
             .then(function () {
                 return Database.update(newState, size);
             })
             .then(function () {
-                return Database.find(state, size);
+                return Database.find(state.key, size);
             })
             .then(function (doc) {
                 chai.expect(doc).to.not.equal(null);
@@ -47,12 +47,12 @@ describe("Test database operations", function () {
             });
     });
     it("remove", function () {
-        return Database.find(state, size).should.eventually.not.equal(null)
+        return Database.find(state.key, size).should.eventually.not.equal(null)
             .then(function () {
-                return Database.remove(state, size);
+                return Database.remove(state.key, size);
             })
             .then(function () {
-                return Database.find(state, size);
+                return Database.find(state.key, size);
             }).should.eventually.equal(null);
     });
 });

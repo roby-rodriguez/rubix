@@ -4,7 +4,6 @@
  * Created by johndoe on 29.12.2015.
  */
 var Operations = require('./operations');
-Operations.workingWidth(4);
 
 var states = Operations.getStates();
 for (var i in states) {
@@ -17,4 +16,5 @@ console.log('Solver: ');
 //Operations.solve('edea|cabb|fbfc|acdd|dece|bfaf');
 
 //Operations.solve('fbfa|ccbb|edec|aadd|beae|dfcf');
-Operations.solve(Operations.shuffle(2));
+//Operations.solve(Operations.shuffle(2));
+Operations.solve('aecf|bbdd|cfae|ddbb|ecec|fafa');

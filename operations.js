@@ -8,8 +8,9 @@
 var Constants = require('./constants');
 var Util = require('./util');
 var Cube = require('./cube');
+var Store = require('./store');
 var states = {};
-var CUBE_WIDTH = 4;
+var CUBE_WIDTH = require('./config').CUBE_WIDTH;
 
 /**
  * Given original state 'a|b|c|d|e|f' (representing the cube), the following permutations are equivalent:
@@ -49,6 +50,19 @@ function checkExists(q) {
     }
 }
 
+function checkExistsNew(q) {
+    var currentState = q.toString(), normal = Store.getState(currentState);
+    if (normal) return normal;
+    for (var j = 0; j < labelPermutations.length; j++) {
+        for (var i = 0; i < cubePermutations.length; i++) {
+            var permutationString = q.permutation(cubePermutations[i]).toString(labelPermutations[j]);
+            var permuted = Store.getState(permutationString);
+            if (permuted)
+                return permuted;
+        }
+    }
+}
+
 function checkExistsAndStore(currentState, step, lastDir, activity) {
     if (states[currentState]) {
         if (step < states[currentState].value) {
@@ -63,9 +77,34 @@ function checkExistsAndStore(currentState, step, lastDir, activity) {
     }
 }
 
-function iterateConstructRec(q, step, lastDir) {
-    var shifted, currentState = checkExists(q) || q.toString();
+/**
+ * Checks whether the reached state exists and updates it if necessary,
+ * otherwise it creates it an continues with the iteration
+ *
+ * @param existing reached state
+ * @param step current step
+ * @param lastDir last twist direction
+ * @param activity callback
+ */
+function checkAndUpdate(existing, current, activity) {
 
+
+
+    if (existing) {
+        if (current.step < existing.step)
+            // see what is to do here update existing or delete it and add only current
+            Store.setState(existing.key, step, lastDir)
+    } else {
+        //set state to current
+        Store.setState(existing.key, step, lastDir);
+        activity();
+    }
+}
+
+function iterateConstructRec(q, step, lastDir) {
+    //todo 1 remove or
+    var shifted, currentState = checkExists(q) || q.toString();
+    //todo 2 pass existing and then current + compute toString only once
     checkExistsAndStore(currentState, step, lastDir,
         function () {
             for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
@@ -118,7 +157,7 @@ function iterateSearch(q) {
 module.exports = {
     getStates : function () {
         if (!Object.keys(states).length)
-        //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
+            //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
             iterateConstruct();
         return states;
     },
@@ -132,8 +171,5 @@ module.exports = {
             q = q.shift(Constants.DIRECTIONS[q.size()][dir]);
         }
         return q.toString();
-    },
-    workingWidth: function (width) {
-        if (width) CUBE_WIDTH = width;
     }
 };

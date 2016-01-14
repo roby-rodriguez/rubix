@@ -4,6 +4,7 @@
  * Created by johndoe on 12.01.2016.
  */
 var MongoClient = require('mongodb').MongoClient;
+var DatabaseUrl = require('./config').DATABASE_URL;
 var Q = require('q');
 
 var db;
@@ -11,7 +12,7 @@ var db;
 function connect () {
     var deferred = Q.defer();
     if (!db) {
-        MongoClient.connect("mongodb://localhost:27017/rubix", deferred.makeNodeResolver());
+        MongoClient.connect(DatabaseUrl, deferred.makeNodeResolver());
     } else {
         deferred.resolve(db);
     }
@@ -43,20 +44,20 @@ var Database = {
                 );
             });
     },
-    find: function (state, size) {
+    find: function (key, size) {
         return connect()
             .then(function (database) {
                 return database.collection('cube' + size)
-                    .find({ key : state.key })
+                    .find({ key : key })
                     .limit(1)
                     .next();
             });
     },
-    remove: function (state, size) {
+    remove: function (key, size) {
         return connect()
             .then(function (database) {
                 database.collection('cube' + size)
-                    .deleteOne({ key : state.key });
+                    .deleteOne({ key : key });
             });
     }
 };
