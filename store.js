@@ -30,11 +30,11 @@ MemoryStore.prototype.get = function (key) {
         };
 };
 
-MemoryStore.prototype.set = function (key, step, parentDir) {
-    if (!this.states[key])
-        this.states[key] = {};
-    this.states[key].step = step;
-    this.states[key].parent = parentDir;
+MemoryStore.prototype.set = function (state) {
+    if (!this.states[state.key])
+        this.states[state.key] = {};
+    this.states[key].step = state.step;
+    this.states[key].parent = state.parent;
 };
 
 function DatabaseStore() {
@@ -42,10 +42,13 @@ function DatabaseStore() {
 }
 
 module.exports = {
-    getState: function (key) {
-        currentStore.get(key);
+    getAllStates: function () {
+        return currentStore.getAll();
     },
-    setState: function (key, step, parentDir) {
-        currentStore.set(key, step, parentDir);
+    getState: function (key) {
+        return currentStore.get(key);
+    },
+    setState: function (state) {
+        currentStore.set(state);
     }
 };

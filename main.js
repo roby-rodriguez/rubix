@@ -16,5 +16,5 @@ console.log('Solver: ');
 //Operations.solve('edea|cabb|fbfc|acdd|dece|bfaf');
 
 //Operations.solve('fbfa|ccbb|edec|aadd|beae|dfcf');
-//Operations.solve(Operations.shuffle(2));
-Operations.solve('aecf|bbdd|cfae|ddbb|ecec|fafa');
+Operations.solve(Operations.shuffle(2));
+//Operations.solve('aecf|bbdd|cfae|ddbb|ecec|fafa');
