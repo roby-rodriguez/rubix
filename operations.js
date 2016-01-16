@@ -40,9 +40,16 @@ var labelPermutations = require('./generator');
  * @param lastDir last twist direction
  */
 function checkExists(q, step, lastDir) {
-    var currentState = q.toString(), normal = Store.getState(currentState);
+    var currentState = q.toString(), normal = Store.getState(currentState),
+        current = {
+            key: currentState,
+            step: step,
+            parent: lastDir
+        };
+
     if (normal)
         return {
+            current: current,
             existing: normal
         };
     for (var j = 0; j < labelPermutations.length; j++) {
@@ -51,16 +58,13 @@ function checkExists(q, step, lastDir) {
             var permuted = Store.getState(permutationString);
             if (permuted)
                 return {
+                    current: current,
                     existing: permuted
                 };
         }
     }
     return {
-        current : {
-            key: currentState,
-            value: step,
-            parent: lastDir
-        }
+        current: current
     }
 }
 
@@ -73,21 +77,26 @@ function checkExists(q, step, lastDir) {
  */
 function checkAndUpdate(state, activity) {
     if (state.existing) {
-        // if found state is weaker than the currently reached state, then replace it
-        if (state.current.step < state.existing.step)
+        // if the found state is weaker than the currently reached state, then replace it
+        if (state.current.step < state.existing.step) {
             // todo see what is to do here update existing or delete it and add only current
             console.log('existing=' + state.existing.key + ' current=' + state.current.key);
-            // Store.setState(existing.key, step, lastDir)
-            Store.setState(state.current);
+            //Store.deleteState(state.existing.key);
+            //Store.setState(state.current);
+            Store.setState({
+                key: state.existing.key,
+                step: state.current.step,
+                parent: state.current.parent
+            });
+        }
     } else {
-        //set state to current
-        //Store.setState(existing.key, step, lastDir);
         // found a completely new state, store it
         Store.setState(state.current);
         activity();
     }
 }
 
+//todo make construction and search methods polymorphic
 function iterateConstructRec(q, step, lastDir) {
     var shifted, state = checkExists(q, step, lastDir);
     checkAndUpdate(state, function () {
@@ -125,8 +134,8 @@ function iterateConstruct() {
 
 function iterateSearch(q) {
     var state = checkExists(q), qparent;
-    if (state) {
-        if (state.existing.value) {
+    if (state.existing) {
+        if (state.existing.step) {
             console.log(state.existing.key + ' ' + state.existing.parent);
             qparent = q.shift(state.existing.parent);
             iterateSearch(qparent);
@@ -138,11 +147,12 @@ function iterateSearch(q) {
 
 module.exports = {
     getStates : function () {
-        // todo this should be figured out from config directly
-        if (!Object.keys(states).length)
+        // todo promisify this - and everything else
+        if (Store.isEmpty()) {
             //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
             iterateConstruct();
-        return states;
+        }
+        return Store.getAllStates();
     },
     solve: function (state) {
         iterateSearch(new Cube(state));

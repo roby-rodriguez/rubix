@@ -7,7 +7,7 @@ var Operations = require('./operations');
 
 var states = Operations.getStates();
 for (var i in states) {
-    console.log(i + ' step ' + states[i].value + ' parent ' + states[i].parent);
+    console.log(i + ' step ' + states[i].step + ' parent ' + states[i].parent);
 }
 
 console.log('Solver: ');
@@ -18,3 +18,5 @@ console.log('Solver: ');
 //Operations.solve('fbfa|ccbb|edec|aadd|beae|dfcf');
 Operations.solve(Operations.shuffle(2));
 //Operations.solve('aecf|bbdd|cfae|ddbb|ecec|fafa');
+
+Operations.solve('aedd|bbae|cfbb|ddcf|ecec|fafa');

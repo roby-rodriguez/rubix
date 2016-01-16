@@ -65,6 +65,18 @@ var Util = {
         return Util.encode(newLabelling[number]);
     },
     /**
+     * Checks if object is empty
+     *
+     * @param obj
+     * @returns {boolean}
+     */
+    empty: function (obj) {
+        var result = false;
+        if (obj === undefined || obj === null) result = true;
+        else if (typeof obj === 'object') result = Object.keys(obj).length ? true : false;
+        return result;
+    },
+    /**
      * Iterates each label of a given encoding and calls the activity function
      * If no encoding is given, the default is used
      *

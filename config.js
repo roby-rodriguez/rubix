@@ -6,7 +6,7 @@
 module.exports = {
     // storage options
     DATABASE_URL: "mongodb://localhost:27017/rubix",
-    USE_DATABASE: true,
+    USE_DATABASE: false,
     // model options
     CUBE_WIDTH: 4
 };
