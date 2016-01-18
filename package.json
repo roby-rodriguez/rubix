@@ -19,7 +19,8 @@
     "chai":             "*",
     "chai-as-promised": "*",
     "mongodb":          "*",
-    "q":                "*"
+    "q":                "*",
+    "promise":          "*"
   },
   "scripts": {
     "test": "mocha test"

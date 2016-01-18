@@ -5,7 +5,7 @@
  */
 var Util = require('./util');
 var Database = require('./database');
-var Config = require('./config');
+var Promise = require('promise');
 var currentStore;
 
 function AbstractStore() {
@@ -22,12 +22,14 @@ MemoryStore.prototype.states = {};
 
 MemoryStore.prototype.get = function (key) {
     //todo should we also place check method here ? maybe?
+    var result;
     if (this.states[key])
-        return {
+        result = {
             key: key,
             step: this.states[key].step,
             parent: this.states[key].parent
         };
+    return Promise.resolve(result);
 };
 
 MemoryStore.prototype.set = function (state) {
@@ -35,29 +37,52 @@ MemoryStore.prototype.set = function (state) {
         this.states[state.key] = {};
     this.states[state.key].step = state.step;
     this.states[state.key].parent = state.parent;
+    return Promise.resolve();
 };
 
 MemoryStore.prototype.delete = function (key) {
     delete this.states[key];
+    return Promise.resolve();
 };
 
 MemoryStore.prototype.getAll = function () {
-    return this.states;
+    return Promise.resolve(this.states);
 };
 
 MemoryStore.prototype.isEmpty = function () {
-    return Util.empty(this.states);
+    return Promise.resolve(Util.empty(this.states));
 };
 
 function DatabaseStore() {
     AbstractStore.call(this);
 }
 
+DatabaseStore.prototype = Object.create(AbstractStore.prototype);
+DatabaseStore.prototype.constructor = DatabaseStore;
+
+DatabaseStore.prototype.get = function (key) {
+    return Database.find(key);
+};
+
+DatabaseStore.prototype.set = function (state) {
+    return Database.update(state);
+};
+
+DatabaseStore.prototype.delete = function (key) {
+    return Database.remove(key)
+};
+
+DatabaseStore.prototype.getAll = function () {
+    return Database.findAll();
+};
+
+DatabaseStore.prototype.isEmpty = function () {
+    return Database.isEmpty();
+};
+
 function init(useDatabase) {
-    Config.USE_DATABASE = useDatabase;
     currentStore = useDatabase? new DatabaseStore() : new MemoryStore();
 }
-init(Config.USE_DATABASE);
 
 module.exports = {
     getAllStates: function () {
@@ -75,5 +100,5 @@ module.exports = {
     isEmpty: function () {
         return currentStore.isEmpty();
     },
-    toggle: init
+    useDatabase: init
 };

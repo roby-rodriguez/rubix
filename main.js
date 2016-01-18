@@ -4,6 +4,8 @@
  * Created by johndoe on 29.12.2015.
  */
 var Operations = require('./operations');
+Operations.useDatabase(false);
+Operations.useRecursion(false);
 
 var states = Operations.getStates();
 for (var i in states) {

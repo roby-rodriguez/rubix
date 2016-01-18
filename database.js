@@ -4,15 +4,16 @@
  * Created by johndoe on 12.01.2016.
  */
 var MongoClient = require('mongodb').MongoClient;
-var DatabaseUrl = require('./config').DATABASE_URL;
+var Config = require('./config');
 var Q = require('q');
+var Promise = require('promise');
 
 var db;
 
 function connect () {
     var deferred = Q.defer();
     if (!db) {
-        MongoClient.connect(DatabaseUrl, deferred.makeNodeResolver());
+        MongoClient.connect(Config.DATABASE_URL, deferred.makeNodeResolver());
     } else {
         deferred.resolve(db);
     }
@@ -20,17 +21,10 @@ function connect () {
 }
 
 var Database = {
-    add: function (state, size) {
+    update: function (state) {
         return connect()
             .then(function (database) {
-                database.collection('cube' + size)
-                    .insertOne(state);
-            });
-    },
-    update: function (state, size) {
-        return connect()
-            .then(function (database) {
-                database.collection('cube' + size)
+                database.collection('cube' + Config.CUBE_WIDTH)
                     .updateOne(
                     {
                         key : state.key
@@ -40,23 +34,43 @@ var Database = {
                             step : state.step,
                             parent: state.parent
                         }
+                    },
+                    {
+                        upsert: true
                     }
                 );
             });
     },
-    find: function (key, size) {
+    find: function (key) {
         return connect()
             .then(function (database) {
-                return database.collection('cube' + size)
+                return database.collection('cube' + Config.CUBE_WIDTH)
                     .find({ key : key })
                     .limit(1)
                     .next();
             });
     },
-    remove: function (key, size) {
+    findAll: function () {
         return connect()
             .then(function (database) {
-                database.collection('cube' + size)
+                return database.collection('cube' + Config.CUBE_WIDTH)
+                    .find();
+            });
+    },
+    isEmpty: function () {
+        return connect()
+            .then(function (database) {
+                return database.collection('cube' + Config.CUBE_WIDTH)
+                    .find()
+                    .count().then(function (count) {
+                        return Promise.resolve(!count);
+                    });
+            });
+    },
+    remove: function (key) {
+        return connect()
+            .then(function (database) {
+                database.collection('cube' + Config.CUBE_WIDTH)
                     .deleteOne({ key : key });
             });
     }

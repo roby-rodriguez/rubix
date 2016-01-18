@@ -73,7 +73,7 @@ var Util = {
     empty: function (obj) {
         var result = false;
         if (obj === undefined || obj === null) result = true;
-        else if (typeof obj === 'object') result = Object.keys(obj).length ? true : false;
+        else if (typeof obj === 'object') result = !Object.keys(obj).length;
         return result;
     },
     /**

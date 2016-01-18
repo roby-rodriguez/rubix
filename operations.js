@@ -2,6 +2,7 @@
  * The idea behind this is to reconstruct as many states as possible beginning from an unscrambled state.
  * We apply twists in all legal directions and then check if the obtained state has(n't) somehow already been
  * reached so far. In this sense, two types of equivalences are checked: cube and label permutations.
+ * TODO wouldn't it be a good idea to delegate bit operations to C-style threads and gather results in a callback fashion?
  *
  * Created by johndoe on 29.12.2015.
  */
@@ -9,7 +10,13 @@ var Constants = require('./constants');
 var Util = require('./util');
 var Cube = require('./cube');
 var Store = require('./store');
-var CUBE_WIDTH = require('./config').CUBE_WIDTH;
+var Config = require('./config');
+var DatabaseOperation = require('./operations.type.js').DatabaseOperation;
+var MemoryOperation = require('./operations.type.js').MemoryOperation;
+// iterative or recursive
+var operationStrategy;
+// memory or database
+var operationType;
 
 /**
  * Given original state 'a|b|c|d|e|f' (representing the cube), the following permutations are equivalent:
@@ -68,6 +75,32 @@ function checkExists(q, step, lastDir) {
     }
 }
 
+function checkExistsNew(q, step, lastDir) {
+    var currentState = q.toString(),
+        current = {
+            key: currentState,
+            step: step,
+            parent: lastDir
+        };
+    return Store.getState(currentState).then(function (normal) {
+        if (normal)
+            return {
+                current: current,
+                existing: normal
+            };
+        operationType.checkPermutations().then(function (permuted) {
+            if (permuted)
+                return {
+                    current: current,
+                    existing: permuted
+                };
+            return {
+                current: current
+            }
+        })
+    });
+}
+
 /**
  * Checks whether the reached state exists and updates it if necessary,
  * otherwise it creates it an continues with the iteration
@@ -79,10 +112,7 @@ function checkAndUpdate(state, activity) {
     if (state.existing) {
         // if the found state is weaker than the currently reached state, then replace it
         if (state.current.step < state.existing.step) {
-            // todo see what is to do here update existing or delete it and add only current
-            console.log('existing=' + state.existing.key + ' current=' + state.current.key);
-            //Store.deleteState(state.existing.key);
-            //Store.setState(state.current);
+            // alternately could delete existing and set current
             Store.setState({
                 key: state.existing.key,
                 step: state.current.step,
@@ -110,7 +140,7 @@ function iterateConstructRec(q, step, lastDir) {
 }
 
 function iterateConstruct() {
-    var pending = [ { q: new Cube(CUBE_WIDTH), step : -1 } ];
+    var pending = [ { q: new Cube(Config.CUBE_WIDTH), step : -1 } ];
     var q, qObj, step, lastDir;
 
     while (pending.length) {
@@ -147,22 +177,32 @@ function iterateSearch(q) {
 
 module.exports = {
     getStates : function () {
-        // todo promisify this - and everything else
-        if (Store.isEmpty()) {
-            //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
-            iterateConstruct();
-        }
-        return Store.getAllStates();
+        Store.isEmpty().then(function (result) {
+            if (result) {
+                //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
+                iterateConstruct();
+            }
+            return Store.getAllStates();
+        });
     },
     solve: function (state) {
         iterateSearch(new Cube(state));
     },
     shuffle: function (times) {
-        var q = new Cube(CUBE_WIDTH), dir;
+        var q = new Cube(Config.CUBE_WIDTH), dir;
         for (var i = 0; i < times; i++) {
             dir = Math.floor(Math.random() * Constants.DIRECTIONS[q.size()].length);
             q = q.shift(Constants.DIRECTIONS[q.size()][dir]);
         }
         return q.toString();
+    },
+    useDatabase: function(useDatabase) {
+        Config.USE_DATABASE = useDatabase;
+        // currentStore = useDatabase? new DatabaseStore() : new MemoryStore();
+        operationType = useDatabase? new DatabaseOperation() : new MemoryOperation();
+        Store.useDatabase(useDatabase);
+    },
+    useRecursion: function (useRecursion) {
+        Config.USE_DATABASE = useRecursion;
     }
 };
