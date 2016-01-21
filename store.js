@@ -92,10 +92,10 @@ module.exports = {
         return currentStore.get(key);
     },
     setState: function (state) {
-        currentStore.set(state);
+        return currentStore.set(state);
     },
     deleteState: function (key) {
-        currentStore.delete(key);
+        return currentStore.delete(key);
     },
     isEmpty: function () {
         return currentStore.isEmpty();

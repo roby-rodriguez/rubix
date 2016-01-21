@@ -6,6 +6,10 @@
  *
  * Created by johndoe on 29.12.2015.
  */
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
+var Q = require('q');
+var Promise = require('promise');
 var Constants = require('./constants');
 var Util = require('./util');
 var Cube = require('./cube');
@@ -47,35 +51,6 @@ var labelPermutations = require('./generator');
  * @param lastDir last twist direction
  */
 function checkExists(q, step, lastDir) {
-    var currentState = q.toString(), normal = Store.getState(currentState),
-        current = {
-            key: currentState,
-            step: step,
-            parent: lastDir
-        };
-
-    if (normal)
-        return {
-            current: current,
-            existing: normal
-        };
-    for (var j = 0; j < labelPermutations.length; j++) {
-        for (var i = 0; i < cubePermutations.length; i++) {
-            var permutationString = q.permutation(cubePermutations[i]).toString(labelPermutations[j]);
-            var permuted = Store.getState(permutationString);
-            if (permuted)
-                return {
-                    current: current,
-                    existing: permuted
-                };
-        }
-    }
-    return {
-        current: current
-    }
-}
-
-function checkExistsNew(q, step, lastDir) {
     var currentState = q.toString(),
         current = {
             key: currentState,
@@ -84,20 +59,20 @@ function checkExistsNew(q, step, lastDir) {
         };
     return Store.getState(currentState).then(function (normal) {
         if (normal)
-            return {
+            return Promise.resolve({
                 current: current,
                 existing: normal
-            };
-        operationType.checkPermutations().then(function (permuted) {
+            });
+        return operationType.checkPermutations(q).then(function (permuted) {
             if (permuted)
-                return {
+                return Promise.resolve({
                     current: current,
                     existing: permuted
-                };
-            return {
+                });
+            return Promise.resolve({
                 current: current
-            }
-        })
+            });
+        });
     });
 }
 
@@ -106,9 +81,9 @@ function checkExistsNew(q, step, lastDir) {
  * otherwise it creates it an continues with the iteration
  *
  * @param state object containing the existing (found) state and current state
- * @param activity callback
  */
-function checkAndUpdate(state, activity) {
+function checkAndUpdate(state) {
+    var promise;
     if (state.existing) {
         // if the found state is weaker than the currently reached state, then replace it
         if (state.current.step < state.existing.step) {
@@ -121,9 +96,9 @@ function checkAndUpdate(state, activity) {
         }
     } else {
         // found a completely new state, store it
-        Store.setState(state.current);
-        activity();
+        promise = Store.setState(state.current);
     }
+    return promise ? promise : Promise.reject();
 }
 
 //todo make construction and search methods polymorphic
@@ -145,42 +120,97 @@ function iterateConstruct() {
 
     while (pending.length) {
         qObj = pending.pop(); q = qObj.q; lastDir = qObj.dir; step = qObj.step;
-        var shifted, state = checkExists(q, ++step, lastDir);
 
-        checkAndUpdate(state, function () {
+        checkExists(q, ++step, lastDir).then(function (state) {
+            checkAndUpdate(state).then(function () {
+                console.log('Current: ' + state);
                 for (var i = 0; i < Constants.DIRECTIONS[q.size()].length; i++) {
-                    var curDir = Constants.DIRECTIONS[q.size()][i];
-                    shifted = q.shift(curDir);
+                    var curDir = Constants.DIRECTIONS[q.size()][i],
+                        shifted = q.shift(curDir);
                     pending.push({
                         q: shifted,
                         dir: Util.reverseString(curDir),
                         step: step
                     });
                 }
-            }
-        );
+            });
+        });
     }
 }
 
 function iterateSearch(q) {
-    var state = checkExists(q), qparent;
-    if (state.existing) {
-        if (state.existing.step) {
-            console.log(state.existing.key + ' ' + state.existing.parent);
-            qparent = q.shift(state.existing.parent);
-            iterateSearch(qparent);
+    checkExists(q).then(function (state) {
+        if (state.existing) {
+            if (state.existing.step) {
+                console.log(state.existing.key + ' ' + state.existing.parent);
+                var qparent = q.shift(state.existing.parent);
+                iterateSearch(qparent);
+            } else
+                console.log(state.existing.key);
         } else
-            console.log(state.existing.key);
-    } else
-        console.error('Missing state: ' + state.current.key);
+            console.error('Missing state: ' + state.current.key);
+    });
+}
+
+function OperationsManager() {
+    EventEmitter.call(this);
+}
+util.inherits(OperationsManager, EventEmitter);
+
+/**
+ * Checks if this cube configuration already exists and updates it if necessary
+ *
+ * @param q starting cube
+ * @param step current step
+ * @param parent switch direction for reaching parent
+ * @returns {OperationsManager} self reference for chaining
+ */
+OperationsManager.prototype.process = function (q, step, parent) {
+    var self = this;
+    checkExists(q, step, parent).then(function (state) {
+        checkAndUpdate(state).then(function () {
+            // reached new state -> continue
+            console.log(q.toString());
+            self.emit('next', q);
+        }, function () {
+            // reached known state -> abandon
+            self.emit('finished');
+        })
+    }, function () {
+        self.emit('error', new Error('Existing check failed'));
+    });
+    return this;
+};
+
+// todo make this such that q can be root or an unknown state
+function construct(startingQ) {
+    var manager = new OperationsManager(),
+        deferred = Q.defer();
+    manager.process(startingQ)
+        .on('next', function (currentQ) {
+            for (var i = 0; i < Constants.DIRECTIONS[currentQ.size()].length; i++) {
+                var curDir = Constants.DIRECTIONS[currentQ.size()][i],
+                    shifted = currentQ.shift(curDir);
+                manager.process(shifted, 0, Util.reverseString(curDir));
+            }
+        })
+        .on('finished', function () {
+            console.info('Finished everything');
+            deferred.resolve();
+        })
+        .on('error', function (err) {
+            deferred.reject(new Error(err));
+        });
+    return deferred.promise;
 }
 
 module.exports = {
     getStates : function () {
-        Store.isEmpty().then(function (result) {
+        return Store.isEmpty().then(function (result) {
             if (result) {
-                //iterateConstructRec(new Cube(CUBE_WIDTH), 0);
-                iterateConstruct();
+                return construct(new Cube(Config.CUBE_WIDTH)).then(function () {
+                    return Store.getAllStates();
+                });
             }
             return Store.getAllStates();
         });

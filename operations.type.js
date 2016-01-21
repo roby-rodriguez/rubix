@@ -27,8 +27,7 @@ var cubePermutations = ['bcdaef', 'cdabef', 'dabcef',
  */
 var labelPermutations = require('./generator');
 
-var AbstractOperationType = function (cube) {
-    this.q = cube;
+var AbstractOperationType = function () {
 };
 
 var MemoryOperation = function () {
@@ -38,7 +37,7 @@ var MemoryOperation = function () {
 MemoryOperation.prototype = Object.create(AbstractOperationType.prototype);
 MemoryOperation.prototype.constructor = MemoryOperation;
 
-MemoryOperation.prototype.checkPermutations = function () {
+MemoryOperation.prototype.checkPermutations = function (q) {
     return check(labelPermutations.length - 1, cubePermutations.length - 1);
 
     function check(j, i) {
@@ -67,7 +66,7 @@ var DatabaseOperation = function () {
 DatabaseOperation.prototype = Object.create(AbstractOperationType.prototype);
 DatabaseOperation.prototype.constructor = DatabaseOperation;
 
-DatabaseOperation.prototype.checkPermutations = function () {
+DatabaseOperation.prototype.checkPermutations = function (q) {
     var searches = [];
     // todo this whole thing could be parallelized with external C-style threads
     for (var j = 0; j < labelPermutations.length; j++) {
